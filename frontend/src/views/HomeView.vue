@@ -51,11 +51,6 @@ const totalPrice = computed(() => {
 </script>
 
 <style scoped>
-.content {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px;
-}
 
 .pizza-summary {
   margin-top: 32px;
