@@ -2,33 +2,32 @@
   <div class="select-sauce">
     <h3>Выберите соус</h3>
 
-    <label
-      v-for="s in options"
-      :key="s.id"
-      class="radio ingredients__input"
-    >
-      <input
-        type="radio"
-        name="sauce"
-        :value="s"
-        :checked="s.id === modelValue.id"
-        @change="emitChange(s)"
-      />
-      <span>{{ s.name }}</span>
-    </label>
+    <div class="sauce-options">
+      <label
+        v-for="sauce in options"
+        :key="sauce.id"
+        class="radio ingredients__input"
+      >
+        <input
+          type="radio"
+          name="sauce"
+          :value="sauce"
+          :checked="sauce.id === modelValue.id"
+          @input="emit('update:modelValue', sauce)"
+        />
+        <span>{{ sauce.name }}</span>
+      </label>
+    </div>
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
   options: { type: Array, default: () => [] },
-  modelValue: { type: Object, required: true }
+  modelValue: { type: Object, required: true },
 });
-const emit = defineEmits(["update:modelValue"]);
 
-function emitChange(sauce) {
-  emit("update:modelValue", sauce);
-}
+const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <style scoped>
@@ -43,6 +42,12 @@ function emitChange(sauce) {
   font-size: 20px;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.sauce-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .radio.ingredients__input {

@@ -5,10 +5,10 @@
 }
 
 .content {
-  min-height: 100vh;
-  max-width: 900px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
-  padding: 24px;
+  box-sizing: border-box;
 }
 
 .layout {

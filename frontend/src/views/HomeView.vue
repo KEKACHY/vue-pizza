@@ -1,6 +1,5 @@
 <template>
   <main class="content">
-    <AppHeader />
 
     <PizzaConstructor
       v-model:pizza="pizza"
@@ -9,12 +8,6 @@
       :sauces="sauces"
       :ingredients="ingredients"
     />
-    
-    <div class="pizza-summary">
-      <h2>Итоговая пицца</h2>
-      <p>Название: {{ pizza.name || '—' }}</p>
-      <p>Итого: {{ totalPrice }} ₽</p>
-    </div>
   </main>
 </template>
 
