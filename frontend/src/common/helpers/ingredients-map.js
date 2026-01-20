@@ -3,8 +3,8 @@ import ingredientNames from "@/common/data/ingredients";
 export const ingredientsMapForPreview = (pizza) => {
   const result = {};
 
-  pizza?.toppings?.forEach((topping) => {
-    const id = topping.id;
+  pizza?.ingredients?.forEach((ingredient) => {
+    const id = ingredient.id;
     const name = ingredientNames[id];
     if (name) {
       result[name] = (result[name] || 0) + 1;

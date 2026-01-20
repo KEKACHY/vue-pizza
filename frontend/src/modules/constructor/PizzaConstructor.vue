@@ -9,14 +9,14 @@
     <div class="constructor-down">
       <div class="constructor-left">
         <SelectSauce v-model="pizza.sauce" :options="sauces" />
-        <SelectToppings v-model:toppings="pizza.toppings" :options="ingredients" />
+        <SelectIngredients v-model:ingredients="pizza.ingredients" :options="ingredients" />
       </div>
       <div class="constructor-right">
         <PizzaPreview
           :dough="doughValue"
           :sauce="sauceValue"
           :ingredients="ingredientsMap"
-          @drop="addTopping"
+          @drop="addIngredient"
         />
         <div class="pizza-name">
         <input type="text" placeholder="Название пиццы" v-model="pizza.name"/>
@@ -35,20 +35,20 @@ import { computed, toRefs } from "vue";
 import SelectDough from "@/modules/constructor/SelectDough.vue";
 import SelectSize from "@/modules/constructor/SelectSize.vue";
 import SelectSauce from "@/modules/constructor/SelectSauce.vue";
-import SelectToppings from "@/modules/constructor/SelectToppings.vue";
+import SelectIngredients from "@/modules/constructor/SelectIngredients.vue";
 import PizzaPreview from "@/modules/constructor/PizzaPreview.vue";
 
 import { ingredientsMapForPreview } from "@/common/helpers/ingredients-map";
 const ingredientsMap = computed(() => ingredientsMapForPreview(pizza.value));
 
-function addTopping(topping) {
-  if (!topping || !topping.id) return;
+function addIngredient(ingredient) {
+  if (!ingredient || !ingredient.id) return;
 
-  const count = pizza.value.toppings.filter(t => t?.id === topping.id).length;
+  const count = pizza.value.ingredients.filter(t => t?.id === ingredient.id).length;
 
   if (count >= 3) return;
 
-  pizza.value.toppings.push(topping);
+  pizza.value.ingredients.push(ingredient);
 }
 
 const doughValue = computed(() => {

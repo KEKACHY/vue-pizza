@@ -21,7 +21,7 @@
 import AppDrag from "@/common/components/AppDrag.vue";
 
 const props = defineProps({
-  toppings: {
+  ingredients: {
     type: Array,
     default: () => []
   },

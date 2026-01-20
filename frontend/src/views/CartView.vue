@@ -19,7 +19,7 @@
                 <ul>
                   <li>{{ item.size }}, на {{ item.dough }} тесте</li>
                   <li>Соус: {{ item.sauce }}</li>
-                  <li>Начинка: {{ item.toppings.join(', ') }}</li>
+                  <li>Начинка: {{ item.ingredients.join(', ') }}</li>
                 </ul>
               </div>
             </div>
@@ -153,7 +153,7 @@ const cartItems = reactive([
     dough: "тонком",
     size: "30 см",
     sauce: "томатный",
-    toppings: ["грибы", "лук", "ветчина", "пармезан", "ананас"],
+    ingredients: ["грибы", "лук", "ветчина", "пармезан", "ананас"],
     quantity: 1,
     price: 782,
   },
@@ -162,7 +162,7 @@ const cartItems = reactive([
     dough: "тонком",
     size: "30 см",
     sauce: "томатный",
-    toppings: ["грибы", "лук", "ветчина", "пармезан", "ананас", "бекон", "блю чиз"],
+    ingredients: ["грибы", "лук", "ветчина", "пармезан", "ананас", "бекон", "блю чиз"],
     quantity: 1,
     price: 782,
   },

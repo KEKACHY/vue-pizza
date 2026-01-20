@@ -25,7 +25,7 @@ const pizza = reactive({
   dough: doughsJson[0] || null,
   size: sizesJson[1] || null,
   sauce: saucesJson[0] || null,
-  toppings: [],
+  ingredients: [],
   name: "",
 });
 
@@ -38,8 +38,8 @@ const totalPrice = computed(() => {
   const doughPrice = pizza.dough?.price || 0;
   const sizeMultiplier = pizza.size?.multiplier || 1;
   const saucePrice = pizza.sauce?.price || 0;
-  const toppingsPrice = pizza.toppings.reduce((sum, t) => sum + (t.price || 0), 0);
-  return Math.round((doughPrice + saucePrice + toppingsPrice) * sizeMultiplier);
+  const ingredientsPrice = pizza.ingredients.reduce((sum, t) => sum + (t.price || 0), 0);
+  return Math.round((doughPrice + saucePrice + ingredientsPrice) * sizeMultiplier);
 });
 </script>
 
