@@ -38,16 +38,8 @@ import SelectSauce from "@/modules/constructor/SelectSauce.vue";
 import SelectToppings from "@/modules/constructor/SelectToppings.vue";
 import PizzaPreview from "@/modules/constructor/PizzaPreview.vue";
 
-const ingredientsMap = computed(() => {
-  const result = {};
-
-  pizza.value.toppings?.forEach(topping => {
-    const key = topping.image.replace(".svg", "");
-    result[key] = (result[key] || 0) + 1;
-  });
-
-  return result;
-});
+import { ingredientsMapForPreview } from "@/common/helpers/ingredients-map";
+const ingredientsMap = computed(() => ingredientsMapForPreview(pizza.value));
 
 function addTopping(topping) {
   if (!topping || !topping.id) return;
@@ -82,13 +74,8 @@ const props = defineProps({
 const emit = defineEmits(["update:pizza"]);
 const { pizza } = toRefs(props);
 
-const totalPrice = computed(() => {
-  const doughPrice = pizza.value.dough?.price || 0;
-  const sizeMultiplier = pizza.value.size?.multiplier || 1;
-  const saucePrice = pizza.value.sauce?.price || 0;
-  const toppingsPrice = pizza.value.toppings?.reduce((sum, t) => sum + (t.price || 0), 0) || 0;
-  return Math.round((doughPrice + saucePrice + toppingsPrice) * sizeMultiplier);
-});
+import { pizzaPrice } from "@/common/helpers/pizza-price";
+const totalPrice = computed(() => pizzaPrice(pizza.value));
 
 const canSubmit = computed(() => pizza.value.name?.trim().length > 0 && totalPrice.value > 0);
 
