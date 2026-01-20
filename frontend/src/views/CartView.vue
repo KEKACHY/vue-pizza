@@ -1,70 +1,75 @@
 <template>
-  <form action="#" method="post" class="layout-form">
+  <form class="layout-form" @submit.prevent="submit">
     <main class="content cart">
       <div class="container">
         <h1 class="title title--big cart__title">Корзина</h1>
 
-        <ul class="cart-list">
-          <li class="cart-list__item" v-for="(item, index) in cartItems" :key="index">
+        <div
+          v-if="cartStore.pizzasExtended.length === 0"
+          class="sheet cart__empty"
+        >
+          <p>В корзине нет товаров</p>
+        </div>
+
+        <ul v-else class="cart-list">
+          <li v-for="(pizza, i) in cartStore.pizzasExtended" :key="i" class="cart-list__item" >
             <div class="product cart-list__product">
               <img
                 :src="getImage('product.svg')"
                 class="product__img"
                 width="56"
                 height="56"
-                :alt="item.name"
+                :alt="pizza.name"
               />
               <div class="product__text">
-                <h2>{{ item.name }}</h2>
+                <h2>{{ pizza.name }}</h2>
                 <ul>
-                  <li>{{ item.size }}, на {{ item.dough }} тесте</li>
-                  <li>Соус: {{ item.sauce }}</li>
-                  <li>Начинка: {{ item.ingredients.join(', ') }}</li>
+                  <li>{{ pizza.size.name }}, на {{ pizza.dough.name }} тесте</li>
+                  <li>Соус: {{ pizza.sauce.name }}</li>
+                  <li>Начинка: {{ pizza.ingredients.map((i) => i.name).join(", ") }}</li>
                 </ul>
               </div>
             </div>
             
             <app-counter
               class="cart-list__counter"
-              v-model="item.quantity"
-              :min="1"
-              :max="99"
+              :value="pizza.quantity"
               accent
+              @input="cartStore.setPizzaQuantity(i, $event)"
             />
 
             <div class="cart-list__price">
-              <b>{{ item.price }} ₽</b>
+              <b>{{ pizza.price }} ₽</b>
             </div>
 
             <div class="cart-list__button">
-              <button type="button" class="cart-list__edit">Изменить</button>
+              <button type="button" class="cart-list__edit" @click="editPizza(i)">Изменить</button>
             </div>
           </li>
         </ul>
 
         <div class="cart__additional">
           <ul class="additional-list">
-            <li class="additional-list__item sheet" v-for="(add, index) in additionalItems" :key="index">
+            <li v-for="misc in cartStore.miscExtended" :key="misc.id" class="additional-list__item sheet">
               <p class="additional-list__description">
                 <img
-                  :src="getImage(add.image)"
+                  :src="getImage(`${misc.image}.svg`)"
                   width="39"
                   height="60"
-                  :alt="add.name"
+                  :alt="misc.name"
                 />
-                <span>{{ add.name }}</span>
+                <span>{{ misc.name }}</span>
               </p>
 
               <div class="additional-list__wrapper">
                 <app-counter
                   class="additional-list__counter"
-                  v-model="add.quantity"
-                  :min="0"
-                  :max="99"
+                  :value="misc.quantity"
                   accent
+                  @input="cartStore.setMiscQuantity(misc.id, $event)"
                 />
                 <div class="additional-list__price">
-                  <b>× {{ add.price }} ₽</b>
+                  <b>× {{ misc.price }} ₽</b>
                 </div>
               </div>
             </li>
@@ -75,7 +80,7 @@
           <div class="cart-form">
             <label class="cart-form__select">
               <span class="cart-form__label">Получение заказа:</span>
-              <select name="delivery" class="select">
+              <select name="delivery" class="select" @input="deliveryOption = $event.target.value">
                 <option value="1">Заберу сам</option>
                 <option value="2">Новый адрес</option>
                 <option value="3">Дом</option>
@@ -84,7 +89,7 @@
 
             <label class="input input--big-label">
               <span>Контактный телефон:</span>
-              <input type="text" name="tel" placeholder="+7 999-999-99-99" />
+              <input v-model="phone" type="text" name="tel" placeholder="+7 999-999-99-99" />
             </label>
 
             <div class="cart-form__address">
@@ -93,21 +98,21 @@
               <div class="cart-form__input">
                 <label class="input">
                   <span>Улица*</span>
-                  <input type="text" name="street" />
+                  <input v-model="street" type="text" name="street" />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Дом*</span>
-                  <input type="text" name="house" />
+                  <input v-model="building" type="text" name="house" />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Квартира</span>
-                  <input type="text" name="apartment" />
+                  <input v-model="flat" type="text" name="apartment" />
                 </label>
               </div>
             </div>
@@ -132,11 +137,11 @@
       </div>
       <div class="footer__right">
         <div class="footer__price">
-          <b>Итого: {{ total }} ₽</b>
+          <b>Итого: {{ cartStore.total }} ₽</b>
         </div>
 
         <div class="footer__submit">
-          <button type="submit" class="button">Оформить заказ</button>
+          <button type="submit" class="button" :disabled="cartStore.total === 0">Оформить заказ</button>
         </div>
       </div>
     </section>
@@ -144,53 +149,76 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
-import AppCounter from "@/common/components/AppCounter.vue";
+  import AppCounter from "@/common/components/AppCounter.vue";
+  import { useCartStore } from "@/stores/cart";
+  import { usePizzaStore } from "@/stores/pizza";
+  import { useRouter } from "vue-router";
+  import { computed, ref } from "vue";
+  import { useProfileStore } from "@/stores/profile";
 
-const cartItems = reactive([
-  {
-    name: "Капричоза",
-    dough: "тонком",
-    size: "30 см",
-    sauce: "томатный",
-    ingredients: ["грибы", "лук", "ветчина", "пармезан", "ананас"],
-    quantity: 1,
-    price: 782,
-  },
-  {
-    name: "Любимая пицца",
-    dough: "тонком",
-    size: "30 см",
-    sauce: "томатный",
-    ingredients: ["грибы", "лук", "ветчина", "пармезан", "ананас", "бекон", "блю чиз"],
-    quantity: 1,
-    price: 782,
-  },
-]);
+  const cartStore = useCartStore();
+  const pizzaStore = usePizzaStore();
+  const profileStore = useProfileStore();
 
-const additionalItems = reactive([
-  { name: "Coca-Cola 0,5 литра", quantity: 1, price: 56, image: "cola.svg" },
-  { name: "Острый соус", quantity: 1, price: 30, image: "sauce.svg" },
-  { name: "Картошка из печи", quantity: 1, price: 56, image: "potato.svg" },
-]);
+  const router = useRouter();
 
-const updateQuantity = (index, val) => {
-  if (val < 0) return;
-  cartItems[index].quantity = val;
-};
+  const deliveryOption = ref("self");
 
-const updateAdditional = (index, val) => {
-  if (val < 0) return;
-  additionalItems[index].quantity = val;
-};
+  const phone = computed({
+    get() {
+      return cartStore.phone;
+    },
+    set(value) {
+      cartStore.setPhone(value);
+    },
+  });
 
-const total = computed(() => {
-  const itemsTotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const addTotal = additionalItems.reduce((sum, a) => sum + a.price * a.quantity, 0);
-  return itemsTotal + addTotal;
-});
+  const street = computed({
+    get() {
+      return cartStore.address.street;
+    },
+    set(value) {
+      cartStore.setStreet(value);
+    },
+  });
 
-const getImage = (image) => new URL(`../assets/img/${image}`, import.meta.url).href;
+  const building = computed({
+    get() {
+      return cartStore.address.building;
+    },
+    set(value) {
+      cartStore.setBuilding(value);
+    },
+  });
+
+  const flat = computed({
+    get() {
+      return cartStore.address.flat;
+    },
+    set(value) {
+      cartStore.setFlat(value);
+    },
+  });
+
+  const editPizza = async (index) => {
+    pizzaStore.loadPizza({
+      index,
+      ...cartStore.pizzas[index],
+    });
+    await router.push({ name: "home" });
+  };
+
+  const submit = async () => {
+    if (deliveryOption.value === "home") {
+      cartStore.setAddress(profileStore.addresses[0]);
+    }
+
+    await router.push({ name: "success" });
+  };
+
+  const getImage = (image) => {
+    return new URL(`../assets/img/${image}`, import.meta.url).href;
+  };
 </script>
 
 <style scoped>

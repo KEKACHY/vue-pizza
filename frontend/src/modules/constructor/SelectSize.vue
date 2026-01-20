@@ -4,24 +4,25 @@
 
     <div class="sizes-row">
       <label
-        v-for="s in options"
-        :key="s.id"
-        :class="['size__input', `size__input--${s.id}`]"
+        v-for="size in items"
+        :key="size.id"
+        class="size__input"
+        :class="`size__input--${size.id}`"
       >
         <input
           type="radio"
           name="size"
-          :value="s"
-          :checked="s.id === modelValue.id"
+          :value="size.id"
+          :checked="size.id === modelValue"
           class="visually-hidden"
-          @change="emitChange(s)"
+          @input="emit('update:modelValue', size.id)"
         />
         <div class="size__circle">
-          <img :src="getImage(s.image)" :alt="s.name" />
+          <img :src="getImage(size.image)" :alt="size.name" />
         </div>
         <div class="size__text">
-          <b>{{ s.name }}</b>
-          <span>{{ s.description }}</span>
+          <b>{{ size.name }}</b>
+          <span>{{ size.description }}</span>
         </div>
       </label>
     </div>
@@ -29,19 +30,21 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  options: { type: Array, default: () => [] },
-  modelValue: { type: Object, required: true },
-});
-const emit = defineEmits(["update:modelValue"]);
+  defineProps({
+    modelValue: {
+      type: Number,
+      required: true,
+    },
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  });
+  const emit = defineEmits(["update:modelValue"]);
 
-function emitChange(size) {
-  emit("update:modelValue", size);
-}
-
-const getImage = (image) => {
-  return new URL(`../../assets/img/${image}`, import.meta.url).href;
-};
+  const getImage = (image) => {
+    return new URL(`../../assets/img/${image}`, import.meta.url).href;
+  };
 </script>
 
 <style scoped>

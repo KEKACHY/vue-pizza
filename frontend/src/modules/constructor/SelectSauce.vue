@@ -4,16 +4,16 @@
 
     <div class="sauce-options">
       <label
-        v-for="sauce in options"
+        v-for="sauce in items"
         :key="sauce.id"
         class="radio ingredients__input"
       >
         <input
           type="radio"
           name="sauce"
-          :value="sauce"
-          :checked="sauce.id === modelValue.id"
-          @input="emit('update:modelValue', sauce)"
+          :value="sauce.value"
+          :checked="sauce.id === modelValue"
+          @input="emit('update:modelValue', sauce.id)"
         />
         <span>{{ sauce.name }}</span>
       </label>
@@ -22,12 +22,17 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  options: { type: Array, default: () => [] },
-  modelValue: { type: Object, required: true },
-});
-
-const emit = defineEmits(["update:modelValue"]);
+  defineProps({
+    modelValue: {
+      type: Number,
+      required: true,
+    },
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  });
+  const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <style scoped>

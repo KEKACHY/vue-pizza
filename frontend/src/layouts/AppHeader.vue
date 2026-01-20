@@ -43,10 +43,6 @@
   </header>
 </template>
 
-<script setup>
-// Здесь ничего не нужно, всё управляется Vue Router
-</script>
-
 <style lang="scss" scoped>
 @import "@/assets/scss/ds-system/ds";
 

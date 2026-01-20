@@ -4,13 +4,13 @@
 
     <div class="ingredients">
       <AppDrag
-        v-for="ing in options"
-        :key="ing.id"
-        :transferData="ing"
+        v-for="ingredient in items"
+        :key="ingredient.id"
+        :transferData="ingredient"
       >
         <div class="ingredient-chip">
-          <img v-if="ing.image" :src="getImage(ing.image)" :alt="ing.name" draggable="false" />
-          {{ ing.name }} ({{ ing.price }} ₽)
+          <img v-if="ingredient.image" :src="getImage(ingredient.image)" :alt="ingredient.name" draggable="false" />
+          {{ ingredient.name }} ({{ ingredient.price }} ₽)
         </div>
       </AppDrag>
     </div>
@@ -18,22 +18,22 @@
 </template>
 
 <script setup>
-import AppDrag from "@/common/components/AppDrag.vue";
+  import AppDrag from "@/common/components/AppDrag.vue";
 
-const props = defineProps({
-  ingredients: {
-    type: Array,
-    default: () => []
-  },
-  options: {
-    type: Array,
-    default: () => []
+  defineProps({
+    ingredients: {
+      type: Object,
+      default: () => []
+    },
+    items: {
+      type: Array,
+      default: () => []
+    }
+  });
+
+  function getImage(image) {
+    return new URL(`../../assets/img/filling/${image}`, import.meta.url).href;
   }
-});
-
-function getImage(image) {
-  return new URL(`../../assets/img/filling/${image}`, import.meta.url).href;
-}
 </script>
 
 <style scoped>

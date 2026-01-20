@@ -1,18 +1,18 @@
 <template>
   <div class="pizza_preview">
-    <app-drop @drop="emit('drop', $event)">
+    <app-drop @drop="emit('drop', $event.id)">
       <div class="pizza" :class="`pizza--foundation--${dough}-${sauce}`">
         <div class="pizza__wrapper">
           <div
-            v-for="(value, key) in pizzaIngredients"
-            :key="key"
+            v-for="item in ingredients"
+            :key="item.id"
             class="pizza__filling"
             :class="[
-              `pizza__filling--${key}`,
-              value === TWO_INGREDIENTS && 'pizza__filling--second',
-              value === THREE_INGREDIENTS && 'pizza__filling--third',
+              `pizza__filling--${item.value}`,
+              item.quantity === TWO_INGREDIENTS && 'pizza__filling--second',
+              item.quantity === THREE_INGREDIENTS && 'pizza__filling--third',
             ]"
-          />
+          ></div>
         </div>
       </div>
     </app-drop>
@@ -20,42 +20,27 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import AppDrop from "@/common/components/AppDrop.vue";
+  import AppDrop from "@/common/components/AppDrop.vue";
 
-const TWO_INGREDIENTS = 2;
-const THREE_INGREDIENTS = 3;
+  const TWO_INGREDIENTS = 2;
+  const THREE_INGREDIENTS = 3;
 
-const props = defineProps({
-  dough: {
-    type: String,
-    default: "light",
-  },
-  sauce: {
-    type: String,
-    default: "tomato",
-  },
-  ingredients: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+  defineProps({
+    dough: {
+      type: String,
+      default: "",
+    },
+    sauce: {
+      type: String,
+      default: "",
+    },
+    ingredients: {
+      type: Array,
+      default: () => [],
+    },
+  });
 
-const emit = defineEmits(["drop"]);
-
-const pizzaIngredients = computed(() => {
-  return Object.entries(props.ingredients).reduce((result, entry) => {
-    /* [ингредиент, количество] */
-    const [key, value] = entry;
-
-    if (value > 0) {
-      /* ингредиент присутствует в пицце */
-      result[key] = value;
-    }
-
-    return result;
-  }, {});
-});
+  const emit = defineEmits(["drop"]);
 </script>
 
 <style lang="scss" scoped>

@@ -3,24 +3,24 @@
     <h3>Выберите тесто</h3>
     <div class="doughs-row">
       <label
-        v-for="d in options"
-        :key="d.id"
-        :class="['dough__input', `dough__input--${d.id}`]"
+        v-for="dough in items"
+        :key="dough.id"
+        class="dough__input"
       >
         <input
           type="radio"
           name="dough"
-          :value="d"
-          :checked="d.id === modelValue.id"
+          :value="dough.id"
+          :checked="dough.id === modelValue"
           class="visually-hidden"
-          @change="emitChange(d)"
+          @input="emit('update:modelValue', dough.id)"
         />
         <div class="dough__circle">
-          <img :src="getImage(d.image)" :alt="d.name" />
+          <img :src="getImage(dough.image)" :alt="dough.name" />
         </div>
         <div class="dough__text">
-          <b>{{ d.name }}</b>
-          <span>{{ d.description }}</span>
+          <b>{{ dough.name }}</b>
+          <span>{{ dough.description }}</span>
         </div>
       </label>
     </div>
@@ -28,19 +28,21 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  options: { type: Array, default: () => [] },
-  modelValue: { type: Object, required: true },
-});
-const emit = defineEmits(["update:modelValue"]);
-
-function emitChange(dough) {
-  emit("update:modelValue", dough);
-}
-
-const getImage = (image) => {
-  return new URL(`../../assets/img/${image}`, import.meta.url).href;
-};
+  defineProps({
+    modelValue: {
+      type: Number,
+      required: true,
+    },
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  });
+  const emit = defineEmits(["update:modelValue"]);
+  
+  const getImage = (image) => {
+    return new URL(`../../assets/img/${image}`, import.meta.url).href;
+  };
 </script>
 
 <style scoped>

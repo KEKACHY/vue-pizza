@@ -2,28 +2,32 @@
   <div class="constructor-wrapper">
     <h1>Конструктор пиццы</h1>
     <div class="constructor-up">
-      <SelectDough v-model="pizza.dough" :options="doughs" />
-      <SelectSize v-model="pizza.size" :options="sizes" />
+      <SelectDough v-model="doughId" :items="dataStore.doughs" />
+      <SelectSize v-model="sizeId" :items="dataStore.sizes" />
     </div>
 
     <div class="constructor-down">
       <div class="constructor-left">
-        <SelectSauce v-model="pizza.sauce" :options="sauces" />
-        <SelectIngredients v-model:ingredients="pizza.ingredients" :options="ingredients" />
+        <SelectSauce v-model="sauceId" :items="dataStore.sauces" />
+        <SelectIngredients 
+          :values="pizzaStore.ingredientQuantities"
+          :items="dataStore.ingredients"
+          @update="pizzaStore.setIngredientQuantity" 
+        />
       </div>
       <div class="constructor-right">
         <PizzaPreview
-          :dough="doughValue"
-          :sauce="sauceValue"
-          :ingredients="ingredientsMap"
-          @drop="addIngredient"
+          :dough="pizzaStore.dough.value"
+          :sauce="pizzaStore.sauce.value"
+          :ingredients="pizzaStore.ingredientsExtended"
+          @drop="pizzaStore.incrementIngredientQuantity"
         />
         <div class="pizza-name">
-        <input type="text" placeholder="Название пиццы" v-model="pizza.name"/>
+        <input type="text" placeholder="Название пиццы" v-model="name"/>
         </div>
         <div class="pizza-total">
-          <p>Итого: {{ totalPrice }} ₽</p>
-          <button :disabled="!canSubmit" @click="submitPizza">Готовьте!</button>
+          <p>Итого: {{ pizzaStore.price }} ₽</p>
+          <button :disabled="canSubmit" @click="submitPizza">Готовьте!</button>
         </div>
       </div>
     </div>
@@ -31,57 +35,86 @@
 </template>
 
 <script setup>
-import { computed, toRefs } from "vue";
-import SelectDough from "@/modules/constructor/SelectDough.vue";
-import SelectSize from "@/modules/constructor/SelectSize.vue";
-import SelectSauce from "@/modules/constructor/SelectSauce.vue";
-import SelectIngredients from "@/modules/constructor/SelectIngredients.vue";
-import PizzaPreview from "@/modules/constructor/PizzaPreview.vue";
+  import { computed, onMounted } from "vue";
+  import SelectDough from "@/modules/constructor/SelectDough.vue";
+  import SelectSize from "@/modules/constructor/SelectSize.vue";
+  import SelectSauce from "@/modules/constructor/SelectSauce.vue";
+  import SelectIngredients from "@/modules/constructor/SelectIngredients.vue";
+  import PizzaPreview from "@/modules/constructor/PizzaPreview.vue";
+  import { usePizzaStore } from "@/stores/pizza";
+  import { useDataStore } from "@/stores/data";
+  import { useCartStore } from "@/stores/cart";
 
-import { ingredientsMapForPreview } from "@/common/helpers/ingredients-map";
-const ingredientsMap = computed(() => ingredientsMapForPreview(pizza.value));
+  const dataStore = useDataStore();
+  const pizzaStore = usePizzaStore();
+  const cartStore = useCartStore();
 
-function addIngredient(ingredient) {
-  if (!ingredient || !ingredient.id) return;
+  const name = computed({
+    get() {
+      return pizzaStore.name;
+    },
+    set(value) {
+      pizzaStore.setName(value);
+    },
+  });
 
-  const count = pizza.value.ingredients.filter(t => t?.id === ingredient.id).length;
+  const doughId = computed({
+    get() {
+      return pizzaStore.doughId;
+    },
+    set(value) {
+      pizzaStore.setDough(value);
+    },
+  });
 
-  if (count >= 3) return;
+  const sizeId = computed({
+    get() {
+      return pizzaStore.sizeId;
+    },
+    set(value) {
+      pizzaStore.setSize(value);
+    },
+  });
 
-  pizza.value.ingredients.push(ingredient);
-}
+  const sauceId = computed({
+    get() {
+      return pizzaStore.sauceId;
+    },
+    set(value) {
+      pizzaStore.setSauce(value);
+    },
+  });
 
-const doughValue = computed(() => {
-  if (!pizza.value.dough) return "light";
+  const addToCart = async () => {
+    cartStore.savePizza(pizzaStore.$state);
+    await router.push({ name: "cart" });
+    resetPizza();
+  };
 
-  return pizza.value.dough.id === 1 ? "light" : "large";
-});
+  const resetPizza = () => {
+    pizzaStore.setName("");
+    pizzaStore.setDough(dataStore.doughs[0].id);
+    pizzaStore.setSize(dataStore.sizes[0].id);
+    pizzaStore.setSauce(dataStore.sauces[0].id);
+    pizzaStore.setIngredients([]);
+    pizzaStore.setIndex(null);
+  };
 
-const sauceValue = computed(() => {
-  if (!pizza.value.sauce) return "tomato";
+  const canSubmit = computed(() => {
+    return name.value.length === 0 || pizzaStore.price === 0;
+  });
 
-  return pizza.value.sauce.id === 1 ? "tomato" : "creamy";
-});
+  const submitPizza = async () => {
+    cartStore.savePizza(pizzaStore.$state);
+    await router.push({ name: "cart" });
+    resetPizza();
+  };
 
-const props = defineProps({
-  pizza: { type: Object, required: true },
-  doughs: { type: Array, default: () => [] },
-  sizes: { type: Array, default: () => [] },
-  sauces: { type: Array, default: () => [] },
-  ingredients: { type: Array, default: () => [] }
-});
-
-const emit = defineEmits(["update:pizza"]);
-const { pizza } = toRefs(props);
-
-import { pizzaPrice } from "@/common/helpers/pizza-price";
-const totalPrice = computed(() => pizzaPrice(pizza.value));
-
-const canSubmit = computed(() => pizza.value.name?.trim().length > 0 && totalPrice.value > 0);
-
-function submitPizza() {
-  alert(`Пицца "${pizza.value.name}" готова! Стоимость: ${totalPrice.value} ₽`);
-}
+  onMounted(() => {
+    if (pizzaStore.index === null) {
+      resetPizza();
+    }
+  });
 </script>
 
 <style scoped>
