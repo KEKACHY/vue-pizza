@@ -1,4 +1,3 @@
-import axios from "axios";
 import { ApiService } from "@/services/axios.service";
 
 export class AuthService extends ApiService {
@@ -8,7 +7,7 @@ export class AuthService extends ApiService {
   }
 
   setAuthHeader(token) {
-    axios.defaults.headers.common["Authorization"] = token
+    this.api.defaults.headers.common["Authorization"] = token
       ? `Bearer ${token}`
       : "";
   }

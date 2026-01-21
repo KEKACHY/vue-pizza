@@ -15,7 +15,7 @@
           <li v-for="(pizza, i) in cartStore.pizzasExtended" :key="i" class="cart-list__item" >
             <div class="product cart-list__product">
               <img
-                :src="getImage('product.svg')"
+                :src="getPublicImage('/public/img/product.svg')"
                 class="product__img"
                 width="56"
                 height="56"
@@ -53,7 +53,7 @@
             <li v-for="misc in cartStore.miscExtended" :key="misc.id" class="additional-list__item sheet">
               <p class="additional-list__description">
                 <img
-                  :src="getImage(`${misc.image}.svg`)"
+                  :src="getPublicImage(misc.image)"
                   width="39"
                   height="60"
                   :alt="misc.name"
@@ -80,32 +80,47 @@
           <div class="cart-form">
             <label class="cart-form__select">
               <span class="cart-form__label">Получение заказа:</span>
-              <select name="delivery" class="select" @input="deliveryOption = $event.target.value">
-                <option value="1">Заберу сам</option>
-                <option value="2">Новый адрес</option>
-                <option value="3">Дом</option>
+
+              <select
+                name="test"
+                class="select"
+                @input="deliveryOption = $event.target.value"
+              >
+                <option :value="-1">Новый адрес</option>
+                <option
+                  v-for="address in profileStore.addresses"
+                  :key="address.id"
+                  :value="address.id"
+                >
+                  {{ address.name }}
+                </option>
               </select>
             </label>
 
             <label class="input input--big-label">
               <span>Контактный телефон:</span>
-              <input v-model="phone" type="text" name="tel" placeholder="+7 999-999-99-99" />
+              <input
+                v-model="phone"
+                type="text"
+                name="tel"
+                placeholder="+7 999-999-99-99"
+              />
             </label>
 
-            <div class="cart-form__address">
+            <div v-if="isNewAddress" class="cart-form__address">
               <span class="cart-form__label">Новый адрес:</span>
 
               <div class="cart-form__input">
                 <label class="input">
                   <span>Улица*</span>
-                  <input v-model="street" type="text" name="street" />
+                  <input v-model="street" required type="text" name="street" />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Дом*</span>
-                  <input v-model="building" type="text" name="house" />
+                  <input v-model="building" required type="text" name="house" />
                 </label>
               </div>
 
@@ -117,7 +132,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div>  
       </div>
     </main>
 
@@ -155,6 +170,8 @@
   import { useRouter } from "vue-router";
   import { computed, ref } from "vue";
   import { useProfileStore } from "@/stores/profile";
+  import { useAuthStore } from "@/stores/auth";
+  import { getPublicImage } from "@/common/helpers/public-image";
 
   const cartStore = useCartStore();
   const pizzaStore = usePizzaStore();
@@ -209,11 +226,16 @@
   };
 
   const submit = async () => {
-    if (deliveryOption.value === "home") {
-      cartStore.setAddress(profileStore.addresses[0]);
+    if (!isNewAddress.value) {
+      cartStore.setAddress(deliveryAddress.value);
     }
 
-    await router.push({ name: "success" });
+    const res = await cartStore.publishOrder();
+    if (res.__state === "success") {
+      authStore.isAuthenticated && (await profileStore.loadOrders());
+      await router.push({ name: "success" });
+      cartStore.reset();
+    }
   };
 
   const getImage = (image) => {

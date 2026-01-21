@@ -9,7 +9,7 @@
         :transferData="ingredient"
       >
         <div class="ingredient-chip">
-          <img v-if="ingredient.image" :src="getImage(ingredient.image)" :alt="ingredient.name" draggable="false" />
+          <img v-if="ingredient.image" :src="getPublicImage(ingredient.image)" :alt="ingredient.name" draggable="false" />
           {{ ingredient.name }} ({{ ingredient.price }} ₽)
         </div>
       </AppDrag>
@@ -19,7 +19,8 @@
 
 <script setup>
   import AppDrag from "@/common/components/AppDrag.vue";
-
+  import { getPublicImage } from "@/common/helpers/public-image";
+  
   defineProps({
     ingredients: {
       type: Object,

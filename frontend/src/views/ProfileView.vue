@@ -3,299 +3,161 @@
     <h1 class="title title--big">Мои данные</h1>
   </div>
 
-  <div class="user">
-    <picture>
-      <source
-        type="image/webp"
-        srcset="
-          @/assets/img/users/user5@2x.webp 1x,
-          @/assets/img/users/user5@4x.webp 2x
-        "
-      />
-      <img
-        src="@/assets/img/users/user5@2x.jpg"
-        srcset="@/assets/img/users/user5@4x.jpg"
-        alt="Очир Сангаджиев"
-        width="72"
-        height="72"
-      />
-    </picture>
+  <div v-if="authStore.user" class="user">
+    <img
+      :src="getPublicImage(authStore.user.avatar)"
+      :alt="authStore.user.name"
+      width="72"
+      height="72"
+    />
     <div class="user__name">
-      <span>Очир Сангаджиев</span>
+      <span>{{ authStore.user.name }}</span>
     </div>
-    <p class="user__phone">Контактный телефон: <span>+7 999-999-99-99</span></p>
+    <p class="user__phone">
+      Контактный телефон: <span>{{ authStore.user.phone }}</span>
+    </p>
   </div>
 
   <div class="layout__address">
-    <div class="sheet address-form">
-      <div class="address-form__header">
-        <b>Адрес №1. Тест</b>
-        <div class="address-form__edit">
-          <button type="button" class="icon">
-            <span class="visually-hidden">Изменить адрес</span>
-          </button>
-        </div>
-      </div>
-      <p>Невский пр., д. 22, кв. 46</p>
-      <small>Позвоните, пожалуйста, от проходной</small>
-    </div>
+    <address-card
+      v-for="(address, index) in profileStore.addresses"
+      :key="address.id"
+      :address="address"
+      :index="index + 1"
+      @delete="profileStore.removeAddress(address.id)"
+      @save="updateAddress(address, $event)"
+    />
   </div>
 
-  <div class="layout__address">
-    <form
-      action="test.html"
-      method="post"
-      class="address-form address-form--opened sheet"
+  <div v-if="!isNewAddressFormOpened" class="layout__button">
+    <button
+      type="button"
+      class="button button--border"
+      @click="isNewAddressFormOpened = true"
     >
-      <div class="address-form__header">
-        <b>Адрес №1</b>
-      </div>
-
-      <div class="address-form__wrapper">
-        <div class="address-form__input">
-          <label class="input">
-            <span>Название адреса*</span>
-            <input
-              type="text"
-              name="addr-name"
-              placeholder="Введите название адреса"
-              required
-            />
-          </label>
-        </div>
-        <div class="address-form__input address-form__input--size--normal">
-          <label class="input">
-            <span>Улица*</span>
-            <input
-              type="text"
-              name="addr-street"
-              placeholder="Введите название улицы"
-              required
-            />
-          </label>
-        </div>
-        <div class="address-form__input address-form__input--size--small">
-          <label class="input">
-            <span>Дом*</span>
-            <input
-              type="text"
-              name="addr-house"
-              placeholder="Введите номер дома"
-              required
-            />
-          </label>
-        </div>
-        <div class="address-form__input address-form__input--size--small">
-          <label class="input">
-            <span>Квартира</span>
-            <input
-              type="text"
-              name="addr-apartment"
-              placeholder="Введите № квартиры"
-            />
-          </label>
-        </div>
-        <div class="address-form__input">
-          <label class="input">
-            <span>Комментарий</span>
-            <input
-              type="text"
-              name="addr-comment"
-              placeholder="Введите комментарий"
-            />
-          </label>
-        </div>
-      </div>
-
-      <div class="address-form__buttons">
-        <button type="button" class="button button--transparent">
-          Удалить
-        </button>
-        <button type="submit" class="button">Сохранить</button>
-      </div>
-    </form>
-  </div>
-
-  <div class="layout__button">
-    <button type="button" class="button button--border">
       Добавить новый адрес
     </button>
   </div>
+
+  <div v-else class="layout__address">
+    <address-edit-form
+      title="Новый адрес"
+      @save="addAddress"
+      @delete="isNewAddressFormOpened = false"
+    />
+  </div>
 </template>
 
-<style scoped>
-.layout__title {
-  margin-bottom: 24px;
-}
+<script setup>
+  import { useProfileStore } from "@/stores/profile";
+  import { useAuthStore } from "@/stores/auth";
+  import AddressCard from "@/common/components/address/AddressCard.vue";
+  import { ref } from "vue";
+  import AddressEditForm from "@/common/components/address/AddressEditForm.vue";
+  import { getPublicImage } from "@/common/helpers/public-image";
 
-.title {
-  margin: 0;
-}
+  const authStore = useAuthStore();
+  const profileStore = useProfileStore();
+
+  const isNewAddressFormOpened = ref(false);
+
+  const addAddress = async (address) => {
+    await profileStore.addAddress(address);
+    isNewAddressFormOpened.value = false;
+  };
+
+  const updateAddress = (address, data) => {
+    profileStore.updateAddress({
+      ...address,
+      ...data,
+    });
+  };
+</script>
+
+<style lang="scss" scoped>
+@import "@/assets/scss/ds-system/ds.scss";
 
 .user {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
 
-  padding: 24px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
-}
-
-.user img {
-  border-radius: 50%;
+  margin-bottom: 33px;
 }
 
 .user__name {
-  font-size: 20px;
-  font-weight: 600;
+  @include b-s20-h23;
+
+  margin-left: 30px;
+
+  span {
+    display: inline-block;
+
+    vertical-align: middle;
+  }
+}
+
+.user__button {
+  display: inline-block;
+
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 .user__phone {
+  @include b-s16-h19;
+
   width: 100%;
-  margin: 0;
-  font-size: 15px;
-  color: #555;
+  margin-top: 20px;
+
+  span {
+    font-weight: 400;
+  }
 }
 
 .layout__address {
-  margin-bottom: 20px;
-}
+  :deep(.address-form) {
+    $bl: &;
 
-.address-form {
-  position: relative;
+    position: relative;
 
-  padding: 20px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
+    padding-top: 0;
+    padding-bottom: 26px;
 
-.address-form__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    p {
+      @include r-s16-h19;
 
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding: 0 16px;
+    }
 
-  font-size: 16px;
-  font-weight: 600;
-}
+    small {
+      @include l-s11-h13;
 
-.address-form__wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
+      display: block;
 
-.address-form__input {
-  width: 100%;
-}
-
-.address-form__input--size--normal {
-  width: 60%;
-}
-
-.address-form__input--size--small {
-  width: 18%;
-}
-
-.input {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.input span {
-  font-size: 14px;
-  color: #555;
-}
-
-.input input {
-  border-radius: 12px;
-  border: 1px solid #dcdfe6;
-  padding: 12px 16px;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  font-size: 15px;
-}
-
-.input input:focus {
-  border-color: #ff8a00;
-  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.15);
-}
-
-.address-form__buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.button {
-  padding: 12px 24px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.button--transparent {
-  background: transparent;
-  border: 1px solid #dcdfe6;
-}
-
-.button:not(.button--transparent) {
-  background: linear-gradient(135deg, #ff8a00, #ff5e00);
-  color: #fff;
-}
-
-.layout__button {
-  margin-top: 24px;
-  text-align: right;
-}
-
-.button--border {
-  background: #ffffff;
-  border: 1px solid #ff8a00;
-  color: #ff8a00;
-}
-
-.icon {
-  width: 32px;
-  height: 32px;
-
-  border: none;
-  border-radius: 50%;
-  background-color: #fff;
-  background-image: url("@/assets/img/edit.svg");
-  background-repeat: no-repeat;
-  background-position: center;
-
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.icon:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  .address-form__input--size--normal,
-  .address-form__input--size--small {
-    width: 100%;
+      padding: 0 16px;
+    }
   }
 
-  .user {
-    flex-direction: column;
-    align-items: flex-start;
+  :deep(.address-form--opened) {
+    .address-form__header {
+      padding: 16px;
+    }
+  }
+
+  :deep(.address-form__header) {
+    @include b-s14-h16;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 21px;
+    padding: 10px 16px;
+
+    border-bottom: 1px solid rgba($green-500, 0.1);
   }
 }
 </style>

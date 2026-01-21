@@ -1,5 +1,5 @@
 <template>
-  <main class="content">
+  <main v-if="dataStore.isDataLoaded" class="content">
     <form action="#" method="post">
       <div class="constructor-wrapper">
         <h1>Конструктор пиццы</h1>

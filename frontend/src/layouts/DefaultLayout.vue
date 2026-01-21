@@ -2,7 +2,7 @@
   <div class="default-layout">
     <AppHeader />
     <main>
-      <slot />
+      <slot></slot>
     </main>
   </div>
 </template>

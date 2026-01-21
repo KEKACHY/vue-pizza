@@ -13,10 +13,10 @@
           :value="dough.id"
           :checked="dough.id === modelValue"
           class="visually-hidden"
-          @input="emit('update:modelValue', dough.id)"
+          @change="emit('update:modelValue', dough.id)"
         />
         <div class="dough__circle">
-          <img :src="getImage(dough.image)" :alt="dough.name" />
+          <img :src="getPublicImage(dough.image)" :alt="dough.name" />
         </div>
         <div class="dough__text">
           <b>{{ dough.name }}</b>
@@ -28,6 +28,7 @@
 </template>
 
 <script setup>
+  import { getPublicImage } from "@/common/helpers/public-image";
   defineProps({
     modelValue: {
       type: Number,
@@ -39,10 +40,6 @@
     },
   });
   const emit = defineEmits(["update:modelValue"]);
-  
-  const getImage = (image) => {
-    return new URL(`../../assets/img/${image}`, import.meta.url).href;
-  };
 </script>
 
 <style scoped>

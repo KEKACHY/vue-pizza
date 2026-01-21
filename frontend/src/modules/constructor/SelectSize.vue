@@ -18,7 +18,7 @@
           @input="emit('update:modelValue', size.id)"
         />
         <div class="size__circle">
-          <img :src="getImage(size.image)" :alt="size.name" />
+          <img :src="getPublicImage(size.image)" :alt="size.name" />
         </div>
         <div class="size__text">
           <b>{{ size.name }}</b>
@@ -30,6 +30,7 @@
 </template>
 
 <script setup>
+  import { getPublicImage } from "@/common/helpers/public-image";
   defineProps({
     modelValue: {
       type: Number,
