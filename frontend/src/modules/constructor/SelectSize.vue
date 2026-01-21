@@ -4,7 +4,7 @@
 
     <div class="sizes-row">
       <label
-        v-for="size in items"
+        v-for="size in uniqueItems"
         :key="size.id"
         class="size__input"
         :class="`size__input--${size.id}`"
@@ -31,7 +31,16 @@
 
 <script setup>
   import { getPublicImage } from "@/common/helpers/public-image";
-  defineProps({
+  import { computed } from "vue";
+  const uniqueItems = computed(() => {
+    const map = {};
+    return props.items.filter(dough => {
+      if (map[dough.name]) return false;
+      map[dough.name] = true;
+      return true;
+    });
+  });
+  const props = defineProps({
     modelValue: {
       type: Number,
       required: true,

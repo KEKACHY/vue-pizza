@@ -4,7 +4,7 @@
 
     <div class="ingredients">
       <AppDrag
-        v-for="ingredient in items"
+        v-for="ingredient in uniqueItems"
         :key="ingredient.id"
         :transferData="ingredient"
       >
@@ -20,8 +20,16 @@
 <script setup>
   import AppDrag from "@/common/components/AppDrag.vue";
   import { getPublicImage } from "@/common/helpers/public-image";
-  
-  defineProps({
+  import { computed } from "vue";
+  const uniqueItems = computed(() => {
+    const map = {};
+    return props.items.filter(dough => {
+      if (map[dough.name]) return false;
+      map[dough.name] = true;
+      return true;
+    });
+  });
+  const props = defineProps({
     ingredients: {
       type: Object,
       default: () => []

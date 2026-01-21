@@ -4,7 +4,7 @@
 
     <div class="sauce-options">
       <label
-        v-for="sauce in items"
+        v-for="sauce in uniqueItems"
         :key="sauce.id"
         class="radio ingredients__input"
       >
@@ -22,7 +22,16 @@
 </template>
 
 <script setup>
-  defineProps({
+  import { computed } from "vue";
+  const uniqueItems = computed(() => {
+    const map = {};
+    return props.items.filter(dough => {
+      if (map[dough.name]) return false;
+      map[dough.name] = true;
+      return true;
+    });
+  });
+  const props = defineProps({
     modelValue: {
       type: Number,
       required: true,

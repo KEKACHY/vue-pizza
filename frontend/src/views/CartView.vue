@@ -50,7 +50,7 @@
 
         <div class="cart__additional">
           <ul class="additional-list">
-            <li v-for="misc in cartStore.miscExtended" :key="misc.id" class="additional-list__item sheet">
+            <li v-for="misc in uniqueMisc" :key="misc.id" class="additional-list__item sheet">
               <p class="additional-list__description">
                 <img
                   :src="getPublicImage(misc.image)"
@@ -172,6 +172,15 @@
   import { useProfileStore } from "@/stores/profile";
   import { useAuthStore } from "@/stores/auth";
   import { getPublicImage } from "@/common/helpers/public-image";
+  
+  const uniqueMisc = computed(() => {
+    const map = {};
+    return cartStore.miscExtended.filter(misc => {
+      if (map[misc.name]) return false;
+      map[misc.name] = true;
+      return true;
+    });
+  });
 
   const cartStore = useCartStore();
   const pizzaStore = usePizzaStore();
@@ -180,7 +189,18 @@
   const router = useRouter();
 
   const deliveryOption = ref("self");
-
+  const isNewAddress = computed(() => deliveryOption.value === -1);
+  const deliveryAddress = computed(() => {
+    if (isNewAddress.value) {
+      return null;
+    } else {
+      return (
+        profileStore.addresses.find(
+          (a) => a.id === Number(deliveryOption.value)
+        ) ?? null
+      );
+    }
+  });
   const phone = computed({
     get() {
       return cartStore.phone;

@@ -3,7 +3,7 @@
     <h3>Выберите тесто</h3>
     <div class="doughs-row">
       <label
-        v-for="dough in items"
+        v-for="dough in uniqueItems"
         :key="dough.id"
         class="dough__input"
       >
@@ -28,8 +28,17 @@
 </template>
 
 <script setup>
+  import { computed } from "vue";
+  const uniqueItems = computed(() => {
+    const map = {};
+    return props.items.filter(dough => {
+      if (map[dough.name]) return false;
+      map[dough.name] = true;
+      return true;
+    });
+  });
   import { getPublicImage } from "@/common/helpers/public-image";
-  defineProps({
+  const props = defineProps({
     modelValue: {
       type: Number,
       required: true,
