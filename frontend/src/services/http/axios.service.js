@@ -1,43 +1,71 @@
-import api from "./AxiosInstance";
+import axios, { AxiosError } from "axios";
 
-export default class ApiService {
-  async get(url) {
-    try {
-      const response = await api.get(url);
-      return response.data;
-    } catch (error) {
-      console.error("GET error:", error);
-      throw error;
+class ApiError extends Error {
+  constructor(message, response) {
+    super(message);
+    this.response = response;
+  }
+}
+
+export class ApiService {
+  _getError(e) {
+    if (e instanceof AxiosError) {
+      return new ApiError(
+        e.response.data?.error?.message ?? e.message,
+        e.response
+      );
+    } else {
+      return new ApiError(e.message, e.response);
     }
   }
 
-  async post(url, payload) {
-    try {
-      const response = await api.post(url, payload);
-      return response.data;
-    } catch (error) {
-      console.error("POST error:", error);
-      throw error;
-    }
+  _wrapper1(method, url) {
+    return async () => {
+      try {
+        const response = await method(url);
+        return {
+          __state: "success",
+          ...response,
+        };
+      } catch (e) {
+        return {
+          __state: "error",
+          data: this._getError(e),
+        };
+      }
+    };
   }
 
-  async put(url, payload) {
-    try {
-      const response = await api.put(url, payload);
-      return response.data;
-    } catch (error) {
-      console.error("PUT error:", error);
-      throw error;
-    }
+  _wrapper2(method, url, payload) {
+    return async () => {
+      try {
+        const response = await method(url, payload);
+        return {
+          __state: "success",
+          ...response,
+        };
+      } catch (e) {
+        return {
+          __state: "error",
+          data: this._getError(e),
+        };
+      }
+    };
   }
 
-  async delete(url) {
-    try {
-      const response = await api.delete(url);
-      return response.data;
-    } catch (error) {
-      console.error("DELETE error:", error);
-      throw error;
-    }
+  $get(url) {
+    return this._wrapper1(axios.get, url)();
+  }
+
+  $post(url, payload) {
+    return this._wrapper2(axios.post, url, payload)();
+  }
+
+  $put(url, payload) {
+    return this._wrapper2(axios.put, url, payload)();
+  }
+
+  $delete(url) {
+    return this._wrapper1(axios.delete, url)();
   }
 }
