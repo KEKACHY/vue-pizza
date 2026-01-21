@@ -1,28 +1,24 @@
-import ApiService from "@/services/axios.service";
+import { ApiService } from "@/services/axios.service";
 
-export default class CrudService extends ApiService {
+export class CrudService extends ApiService {
   constructor(resource) {
     super();
     this.resource = resource;
   }
 
-  getAll() {
-    return this.get(this.resource);
+  get() {
+    return this.$get(this.resource);
   }
 
-  getById(id) {
-    return this.get(`${this.resource}/${id}`);
+  post(entity) {
+    return this.$post(this.resource, entity);
   }
 
-  create(payload) {
-    return this.post(this.resource, payload);
+  put(entity) {
+    return this.$put(`${this.resource}/${entity.id}`, entity);
   }
 
-  update(id, payload) {
-    return this.put(`${this.resource}/${id}`, payload);
-  }
-
-  remove(id) {
-    return this.delete(`${this.resource}/${id}`);
+  delete(id) {
+    return this.$delete(`${this.resource}/${id}`);
   }
 }
