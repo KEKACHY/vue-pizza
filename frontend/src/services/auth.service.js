@@ -1,4 +1,5 @@
 import { ApiService } from "@/services/axios.service";
+import axios from "axios";
 
 export class AuthService extends ApiService {
   constructor(path) {
@@ -7,7 +8,7 @@ export class AuthService extends ApiService {
   }
 
   setAuthHeader(token) {
-    this.api.defaults.headers.common["Authorization"] = token
+    axios.defaults.headers.common["Authorization"] = token
       ? `Bearer ${token}`
       : "";
   }

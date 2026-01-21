@@ -185,10 +185,10 @@
   const cartStore = useCartStore();
   const pizzaStore = usePizzaStore();
   const profileStore = useProfileStore();
-
+  const authStore = useAuthStore();
   const router = useRouter();
 
-  const deliveryOption = ref("self");
+  const deliveryOption = ref(-1);
   const isNewAddress = computed(() => deliveryOption.value === -1);
   const deliveryAddress = computed(() => {
     if (isNewAddress.value) {
@@ -256,10 +256,6 @@
       await router.push({ name: "success" });
       cartStore.reset();
     }
-  };
-
-  const getImage = (image) => {
-    return new URL(`../assets/img/${image}`, import.meta.url).href;
   };
 </script>
 

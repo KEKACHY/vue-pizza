@@ -1,6 +1,10 @@
 <template>
   <app-layout>
-    <router-view v-if="isLoaded" />
+    <router-view v-slot="{ Component }">
+      <transition name="slide" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </app-layout>
 </template>
 
@@ -18,8 +22,8 @@
   const isLoaded = ref(false);
 
   const checkLoggedIn = async () => {
-    const authStore = useAuthStore();
-    const token = TokenService.getToken();
+  const authStore = useAuthStore();
+  const token = TokenService.getToken();
     if (!token) {
       isLoaded.value = true;
       return;

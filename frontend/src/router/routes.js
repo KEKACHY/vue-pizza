@@ -1,6 +1,8 @@
+import { isLogin } from "@/navigationguards/isLogin";
+
 export const routes = [
   {
-    path: "/",
+    path: "",
     name: "home",
     component: () => import("@/views/HomeView.vue"),
     meta: { layout: "DefaultLayout" },
@@ -15,13 +17,24 @@ export const routes = [
     path: "/cart",
     name: "cart",
     component: () => import("@/views/CartView.vue"),
-    meta: { layout: "DefaultLayout" },
+    meta: {
+      layout: "DefaultLayout",
+    },
+  },
+  {
+    path: "/success",
+    name: "success",
+    component: () => import("@/views/SuccessView.vue"),
+    meta: { layout: "SimpleLayout" },
   },
   {
     path: "/user",
     name: "user",
     component: () => import("@/views/UserView.vue"),
-    meta: { layout: "DefaultLayout" },
+    meta: {
+      layout: "DefaultLayout",
+      navGuard: [isLogin],
+    },
     children: [
       {
         path: "orders",
