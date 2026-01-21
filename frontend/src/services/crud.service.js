@@ -1,4 +1,4 @@
-import ApiService from "@/services/http/axios.service";
+import ApiService from "@/services/axios.service";
 
 export default class CrudService extends ApiService {
   constructor(resource) {
